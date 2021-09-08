@@ -10,18 +10,18 @@ kernel = np.array([[-1, -1, -1],
                    [-1, -1, -1]])
 
 
-def empty(a):
-    pass
+# def empty(a):
+#     pass
 
 
-cv2.namedWindow("HSV")
-cv2.resizeWindow("HSV", 640, 240)
-cv2.createTrackbar("HUE Min", "HSV", 0, 179, empty)
-cv2.createTrackbar("HUE Max", "HSV", 179, 179, empty)
-cv2.createTrackbar("SAT Min", "HSV", 0, 255, empty)
-cv2.createTrackbar("SAT Max", "HSV", 255, 255, empty)
-cv2.createTrackbar("VALUE Min", "HSV", 0, 255, empty)
-cv2.createTrackbar("VALUE Max", "HSV", 255, 255, empty)
+# cv2.namedWindow("HSV")
+# cv2.resizeWindow("HSV", 640, 240)
+# cv2.createTrackbar("HUE Min", "HSV", 0, 179, empty)
+# cv2.createTrackbar("HUE Max", "HSV", 179, 179, empty)
+# cv2.createTrackbar("SAT Min", "HSV", 0, 255, empty)
+# cv2.createTrackbar("SAT Max", "HSV", 255, 255, empty)
+# cv2.createTrackbar("VALUE Min", "HSV", 0, 255, empty)
+# cv2.createTrackbar("VALUE Max", "HSV", 255, 255, empty)
 
 stop = False
 
@@ -30,7 +30,6 @@ while(True):
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
     height, width, _ = frame.shape
-
 
     # width =70, height =70
     cv2.rectangle(frame, (width // 2+115, height//2-55),
@@ -57,12 +56,12 @@ while(True):
             if curr[2] < lowerish[2]:
                 lowerish[2] = curr[2]
 
-    h_min = cv2.getTrackbarPos("HUE Min", "HSV")
-    h_max = cv2.getTrackbarPos("HUE Max", "HSV")
-    s_min = cv2.getTrackbarPos("SAT Min", "HSV")
-    s_max = cv2.getTrackbarPos("SAT Max", "HSV")
-    v_min = cv2.getTrackbarPos("VALUE Min", "HSV")
-    v_max = cv2.getTrackbarPos("VALUE Max", "HSV")
+    # h_min = cv2.getTrackbarPos("HUE Min", "HSV")
+    # h_max = cv2.getTrackbarPos("HUE Max", "HSV")
+    # s_min = cv2.getTrackbarPos("SAT Min", "HSV")
+    # s_max = cv2.getTrackbarPos("SAT Max", "HSV")
+    # v_min = cv2.getTrackbarPos("VALUE Min", "HSV")
+    # v_max = cv2.getTrackbarPos("VALUE Max", "HSV")
     # apply gussian blur
     blur = cv2.GaussianBlur(frame, (3, 3), cv2.BORDER_DEFAULT)
 
