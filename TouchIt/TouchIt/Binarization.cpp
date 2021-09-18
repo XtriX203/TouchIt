@@ -1,25 +1,6 @@
 #include "Binarization.h"
 
 /// <summary>
-/// this function responsible for the binarization process and have all the needed resources for it
-/// </summary>
-/// <param name="frame">the frame to binarize</param>
-/// (the square is the area where we take the color range for the binarization)
-/// <param name="pointX">the x value of the top left square</param>
-/// <param name="pointY">the x value of the top left square</param>
-/// <param name="pointLen">the height and width of the square</param>
-/// <returns>the binarized frame</returns>
-cv::Mat Binarization::binarize(cv::Mat frame, int pointX, int pointY, int pointLen)
-{
-    cv::Mat hsv = convertToHSV(frame);
-    cv::Vec3b low = findLow(hsv, pointX, pointY, pointLen);
-    cv::Vec3b high = findHigh(hsv, pointX, pointY, pointLen);
-
-    cv::Mat binarized = mask(hsv, low, high);
-    return binarized;
-}
-
-/// <summary>
 /// convert from RGB to HSV
 /// </summary>
 /// <param name="frame">the original RGB frame</param>
