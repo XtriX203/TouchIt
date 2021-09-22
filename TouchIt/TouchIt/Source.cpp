@@ -49,6 +49,7 @@ int main()
 		cv::Mat bin = Binarization::mask(hsv, low, high);
 
 		cv::imshow("original", f);	//show the RGB frame
+		cv::imshow("HSV", hsv);
 		cv::imshow("Biary", bin);	//show the binirized image
 		cv::waitKey(1);
 	}

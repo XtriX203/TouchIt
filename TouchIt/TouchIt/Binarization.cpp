@@ -1,15 +1,144 @@
 #include "Binarization.h"
+#define ANGLE 30
+#define MAX_ANGLE 180
+
+#define UNDEFINED -1
+//for RGB
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+//fro HSV
+#define HUE 0
+#define SAT 1
+#define VAL 2
+
+#define RGB_MAX 255
+
 
 /// <summary>
-/// convert from RGB to HSV
+/// convert frame from RGB to HSV
 /// </summary>
 /// <param name="frame">the original RGB frame</param>
 /// <returns>the HSV frame</returns>
 cv::Mat Binarization::convertToHSV(cv::Mat frame)
 {
-    cv::Mat hsv;
-    cv::cvtColor(frame, hsv, cv::COLOR_RGB2HSV);    //later we might change to manual convertion
-    return hsv;
+	cv::Mat hsv = frame.clone();	//the HSV frame to return *** find a way to set the size of the mat without cloning the pic! ***
+	cv::Size size = frame.size();	//the dimentions of the frame
+
+	//manual RGB to HSV (for efficiency evey square of 2x2 is the same hsv color as the top right of the square)
+	for (int i = 0; i < size.height; i += 2)
+	{
+		for (int j = 0; j < size.width; j += 2)
+		{
+			cv::Vec3b hsvColor;							//the hsv color of the pixel
+			cv::Vec3b curr = frame.at<cv::Vec3b>(i, j);	//the current pixel
+
+			hsvColor = pixelRGBToHSV(curr);	//convert pixel from RGB to HSV
+			if (hsvColor[RED] == 0 && hsvColor[GREEN] == 0 && hsvColor[BLUE] == 0)	//if the function in the line above could not determine the dominant color
+			{
+				if (i != 0)	//set this pixels values as the pixel above
+				{
+					hsvColor = hsv.at<cv::Vec3b>(i - 1, j);
+				}
+				else if (j != 0)	//set this pixels values as the pixel to the left
+				{
+					hsvColor = hsv.at<cv::Vec3b>(i, j - 1);
+				}
+				else	//if it is the first pixel it will be black
+				{
+					hsvColor = cv::Vec3b(0, 0, 0);
+				}
+			}
+
+			//set the hsv values for the 2x2 sqare
+			hsv.at<cv::Vec3b>(i, j) = hsvColor;
+			hsv.at<cv::Vec3b>(i, j + 1) = hsvColor;
+			hsv.at<cv::Vec3b>(i + 1, j) = hsvColor;
+			hsv.at<cv::Vec3b>(i + 1, j + 1) = hsvColor;
+		}
+	}
+	return hsv;
+}
+
+/// <summary>
+/// convert a single pixel from RGB to HSV
+/// </summary>
+/// <param name="pixel">a pixel with RGB values</param>
+/// <returns>a pixel with HSV values</returns>
+cv::Vec3b Binarization::pixelRGBToHSV(cv::Vec3b pixel)
+{
+	int hue = 0;					//H in HSV
+	double sat = 0;					//S in HSV
+	int val = 0;					//V in HSV
+
+	int maxRGBIndex = UNDEFINED;	//the RGB mos dominant value
+	int minRGBIndex = UNDEFINED;	//the RGB least dominant value
+	cv::Vec3d doublePixel;  //pixel with range 0UNDEFINED for the HUE calculation
+
+	//find the max RGB value (the dominant color)
+	if (pixel[RED] > pixel[GREEN] && pixel[RED] > pixel[BLUE])	//max is red
+	{
+		maxRGBIndex = RED;
+	}
+	else if (pixel[GREEN] > pixel[RED] && pixel[GREEN] > pixel[BLUE])	//max is green
+	{
+		maxRGBIndex = GREEN;
+	}
+	else if (pixel[BLUE] > pixel[RED] && pixel[BLUE] > pixel[GREEN])	//max is blue
+	{
+		maxRGBIndex = BLUE;
+	}
+	//if there is no dominant color return black
+	if (maxRGBIndex == UNDEFINED)
+	{
+		return cv::Vec3b(0, 0, 0);
+	}
+
+	//***set the value (V in HSV)
+	val = pixel[maxRGBIndex];	//the value is equal to the highest value in RGB
+
+	//find the min RGB value (the least dominant color)
+	if (pixel[(maxRGBIndex + 1) % 2] < pixel[(maxRGBIndex + 2) % 2])
+	{
+		minRGBIndex = (maxRGBIndex + 1) % 2;
+	}
+	else
+	{
+		minRGBIndex = (maxRGBIndex + 2) % 2;
+	}
+	//***calculate the saturation
+	sat = (int)std::round(255 * (pixel[maxRGBIndex] - pixel[minRGBIndex]) / pixel[maxRGBIndex]);
+
+	//set double pixel values (3 values)
+	for (int i = 0; i < 3; i++)
+	{
+		doublePixel[i] = (double)pixel[i] / RGB_MAX;
+	}
+	//***calculate the HUE (the hue calculation is based on the dominant color)
+	switch (maxRGBIndex)
+	{
+	case RED:	//HUE is 0-30 or 150UNDEFINED79
+		hue = ANGLE * (doublePixel[GREEN] - doublePixel[BLUE]) / (doublePixel[maxRGBIndex] - doublePixel[minRGBIndex]);
+		if (hue < 0)	//in this case the HUE can be as low as -30 degrees so we need to circle back to 180 and decrease from there because the HUE values are cyclic values
+		{
+			hue = MAX_ANGLE - hue;
+		}
+		break;
+
+	case GREEN:	//HUE is 30-90
+		hue = ANGLE * (2 + doublePixel[BLUE] - doublePixel[RED]) / (doublePixel[GREEN] - doublePixel[minRGBIndex]);
+		break;
+
+	case BLUE:	//HUE is 90UNDEFINED50
+		hue = ANGLE * (4 + doublePixel[RED] - doublePixel[GREEN]) / (doublePixel[BLUE] - doublePixel[minRGBIndex]);
+		break;
+
+	default:
+		//will not happen, the funtion should return [0,0,0] if it could not determine the dominant color earlier
+		break;
+	}
+
+	return cv::Vec3b(hue, sat, val);
 }
 
 /// <summary>
@@ -23,29 +152,29 @@ cv::Mat Binarization::convertToHSV(cv::Mat frame)
 /// <returns>a pixel with the lowest HSV values in the square</returns>
 cv::Vec3b Binarization::findLow(cv::Mat hsv, int pointX, int pointY, int pointLen)
 {
-    cv::Vec3b low(179, 255, 255);   //will be returned
+	cv::Vec3b low(179, 255, 255);	//initialize with the highest values. will be returned
 
-    for (int i = pointX; i < pointX + pointLen; i++)
-    {
-        for (int j = pointY; j < pointY + pointLen; j++)
-        {
-            cv::Vec3b curr = hsv.at<cv::Vec3b>(j, i);
+	for (int i = pointX; i < pointX + pointLen; i++)
+	{
+		for (int j = pointY; j < pointY + pointLen; j++)
+		{
+			cv::Vec3b curr = hsv.at<cv::Vec3b>(j, i);	//the current pixel
 
-            if (curr[0] < low[0])
-            {
-                low[0] = curr[0];
-            }
-            if (curr[1] < low[1])
-            {
-                low[1] = curr[1];
-            }
-            if (curr[2] < low[2])
-            {
-                low[2] = curr[2];
-            }
-        }
-    }
-    return low;
+			if (curr[HUE] < low[HUE])	//check if the current HUE is lower
+			{
+				low[HUE] = curr[HUE];
+			}
+			if (curr[SAT] < low[SAT])	//check if the current SAT is lower
+			{
+				low[SAT] = curr[SAT];
+			}
+			if (curr[VAL] < low[VAL])	//check if the current VAL is lower
+			{
+				low[VAL] = curr[VAL];
+			}
+		}
+	}
+	return low;
 }
 
 /// <summary>
@@ -59,55 +188,64 @@ cv::Vec3b Binarization::findLow(cv::Mat hsv, int pointX, int pointY, int pointLe
 /// <returns>a pixel with the highest HSV values in the square</returns>
 cv::Vec3b Binarization::findHigh(cv::Mat hsv, int pointX, int pointY, int pointLen)
 {
-    cv::Vec3b high(179, 255, 255);   //will be returned
+	cv::Vec3b high(179, 255, 255);	//will be returned	*****works better with the max hsv values!!!***  a lucky mistake :)
+	
+	/*i will not remove the code yet, i thing more testing is needed*/
+	for (int i = pointX; i < pointX + pointLen; i++)
+	{
+		for (int j = pointY; j < pointY + pointLen; j++)
+		{
+			cv::Vec3b curr = hsv.at<cv::Vec3b>(j, i);
 
-    for (int i = pointX; i < pointX + pointLen; i++)
-    {
-        for (int j = pointY; j < pointY + pointLen; j++)
-        {
-            cv::Vec3b curr = hsv.at<cv::Vec3b>(j, i);
-
-            if (curr[0] > high[0])
-            {
-                high[0] = curr[0];
-            }
-            if (curr[1] > high[1])
-            {
-                high[1] = curr[1];
-            }
-            if (curr[2] > high[2])
-            {
-                high[2] = curr[2];
-            }
-        }
-    }
-    return high;
+			if (curr[0] > high[0])
+			{
+				high[0] = curr[0];
+			}
+			if (curr[1] > high[1])
+			{
+				high[1] = curr[1];
+			}
+			if (curr[2] > high[2])
+			{
+				high[2] = curr[2];
+			}
+		}
+	}
+	return high;
 }
 
+/// <summary>
+/// binarize the frame
+/// </summary>
+/// <param name="hsv">the frame in HSV color space</param>
+/// <param name="low">the lowest HSV values for the range</param>
+/// <param name="high">the highest HSV values for the range</param>
+/// <returns>the mask in RGB color space</returns> (later might be changed to binary color space)
 cv::Mat Binarization::mask(cv::Mat hsv, cv::Vec3b low, cv::Vec3b high)
 {
-    cv::Mat bin = hsv.clone();  //will be the binarized frame
-    cv::Size size = hsv.size();
-    cv::Vec3b black = { 0,0,0 };
-    cv::Vec3b white = { 255,255,255 };
+	cv::Mat bin = hsv.clone();	//will be the binarized frame *** find a way to set the size of the mat without cloning the pic! ***
+	cv::Size size = hsv.size();	//the dimations of the frame
+	cv::Vec3b black = { 0,0,0 };		//black RGB
+	cv::Vec3b white = { 255,255,255 };	//white RGB
 
-    for (int i = 0; i < size.height; i++)
-    {
-        for (int j = 0; j < size.width; j++)
-        {
-            cv::Vec3b curr = bin.at<cv::Vec3b>(i, j);
+	for (int i = 0; i < size.height; i++)
+	{
+		for (int j = 0; j < size.width; j++)
+		{
+			cv::Vec3b curr = bin.at<cv::Vec3b>(i, j);	//the current pixel
 
-            if (curr[0] > low[0] && curr[0] < high[0] &&
-                curr[1] > low[1] && curr[1] < high[1] &&
-                curr[2] > low[2] && curr[2] < high[2])
-            {
-                bin.at<cv::Vec3b>(i, j) = white;
-            }
-            else
-            {
-                bin.at<cv::Vec3b>(i, j) = black;
-            }
-        }
-    }
-    return bin;
+			//check if the color is in the color range
+			if (curr[HUE] > low[HUE] && curr[HUE] < high[HUE] &&
+				curr[SAT] > low[SAT] && curr[SAT] < high[SAT] &&
+				curr[VAL] > low[VAL] && curr[VAL] < high[VAL])
+			{
+				bin.at<cv::Vec3b>(i, j) = white;	//set pixel as withe
+			}
+			else	//if not in color range
+			{
+				bin.at<cv::Vec3b>(i, j) = black;	//set pixel as black
+			}
+		}
+	}
+	return bin;
 }
