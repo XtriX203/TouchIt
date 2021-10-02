@@ -25,7 +25,7 @@ cv::Mat Binarization::convertToHSV(cv::Mat frame)
 	cv::Mat hsv = frame.clone();	//the HSV frame to return *** find a way to set the size of the mat without cloning the pic! ***
 	cv::Size size = frame.size();	//the dimentions of the frame
 
-	//manual RGB to HSV (for efficiency evey square of 2x2 is the same hsv color as the top right of the square)
+	//manual RGB to HSV (for efficiency, every square of 2x2 is the same hsv color as the top right of the square)
 	for (int i = 0; i < size.height; i += 2)
 	{
 		for (int j = 0; j < size.width; j += 2)
@@ -223,8 +223,9 @@ cv::Vec3b Binarization::findHigh(cv::Mat hsv, int pointX, int pointY, int pointL
 /// <returns>the mask in RGB color space</returns> (later might be changed to binary color space)
 cv::Mat Binarization::mask(cv::Mat hsv, cv::Vec3b low, cv::Vec3b high)
 {
-	cv::Mat bin = hsv.clone();	//will be the binarized frame *** find a way to set the size of the mat without cloning the pic! ***
-	cv::Size size = hsv.size();	//the dimations of the frame
+	cv::Mat bin= cv::Mat(hsv.size().height,hsv.size().width, CV_8UC3);	//will be the binarized frame *** find a way to set the size of the mat without cloning the pic! ***
+	
+	cv::Size size = bin.size();	//the dimations of the frame
 	cv::Vec3b black = { 0,0,0 };		//black RGB
 	cv::Vec3b white = { 255,255,255 };	//white RGB
 
@@ -232,7 +233,7 @@ cv::Mat Binarization::mask(cv::Mat hsv, cv::Vec3b low, cv::Vec3b high)
 	{
 		for (int j = 0; j < size.width; j++)
 		{
-			cv::Vec3b curr = bin.at<cv::Vec3b>(i, j);	//the current pixel
+			cv::Vec3b curr = hsv.at<cv::Vec3b>(i, j);	//the current pixel
 
 			//check if the color is in the color range
 			if (curr[HUE] > low[HUE] && curr[HUE] < high[HUE] &&
