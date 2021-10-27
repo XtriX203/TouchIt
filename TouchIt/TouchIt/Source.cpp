@@ -4,7 +4,9 @@
 #include <iostream>
 #include <thread>
 #include <conio.h>
+#include <deque>
 #include "Binarization.h"
+#include "Background_estimation.h"
 
 void checkStop();
 bool stop = false;
@@ -13,11 +15,8 @@ int main()
 {
 	cv::VideoCapture cap(0);
 	cv::Mat frame;
-	cv::Mat f;
-
-	cv::Vec3b low;
-	cv::Vec3b high;
-
+	cv::Mat avg;
+	std::deque<cv::Mat > background;
 
 	std::thread a(checkStop);
 	a.detach();
@@ -25,32 +24,23 @@ int main()
 	{
 		cap.read(frame);
 		flip(frame, frame, 1);
-		f = frame.clone();	//create a copy of the frame to draw the square on
-
-		cv::Size size = frame.size();	//get frame sizes
-		int ponitX = size.width / 2 + 115;
-		int pointY = size.height / 2 - 55;
-		int len = 70;
-
-		//draw the square
-		cv::Rect rect = cv::Rect(ponitX, pointY, len, len);
-		rectangle(f, rect, cv::Scalar(), 3);
 
 		//get a binarized image
-		cv::Mat hsv = Binarization::convertToHSV(frame);
-
 		if (!stop)
 		{
-			low = Binarization::findLow(hsv, ponitX, pointY, len);
-			high = Binarization::findHigh(hsv, ponitX, pointY, len);
+			if (background.size() == 10)
+			{
+				background.pop_front();
+			}
+			background.push_back(frame);
+			avg = Background_estimation::GetAverageBG(background,frame.rows,frame.cols);
 		}
 
+		//cv::Mat bin = Binarization::mask(hsv, low, high);
 
-		cv::Mat bin = Binarization::mask(hsv, low, high);
-
-		cv::imshow("original", f);	//show the RGB frame
-		cv::imshow("HSV", hsv);
-		cv::imshow("Biary", bin);	//show the binirized image
+		cv::imshow("original", frame);	//show the RGB frame
+		cv::imshow("average", avg);	//show the RGB frame
+		
 		cv::waitKey(1);
 	}
 	return 0;

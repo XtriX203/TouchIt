@@ -21,6 +21,9 @@
     <ClCompile Include="Binarization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Background_estimation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="grapefruit.jpg">
@@ -29,6 +32,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Binarization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Background_estimation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
