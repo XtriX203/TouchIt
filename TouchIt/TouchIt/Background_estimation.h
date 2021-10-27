@@ -5,6 +5,6 @@
 class Background_estimation
 {
 public:
-	static cv::Mat GetAverageBG(std::deque<cv::Mat> src, int height, int width);
-
+	static cv::Mat GetAverageBG(cv::Mat avg, cv::Mat src, int height, int width, int mul);
+	static cv::Mat MaskBin(cv::Mat avg, cv::Mat frame, int height, int width);
 };

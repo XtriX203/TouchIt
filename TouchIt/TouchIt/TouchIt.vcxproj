@@ -80,8 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\Magshimim\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Magshimim\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\opencv\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\opencv\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -148,9 +148,6 @@
     <ClCompile Include="Background_estimation.cpp" />
     <ClCompile Include="Binarization.cpp" />
     <ClCompile Include="Source.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="grapefruit.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Background_estimation.h" />

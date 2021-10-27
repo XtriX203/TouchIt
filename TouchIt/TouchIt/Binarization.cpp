@@ -7,7 +7,7 @@
 #define RED 0
 #define GREEN 1
 #define BLUE 2
-//fro HSV
+//for HSV
 #define HUE 0
 #define SAT 1
 #define VAL 2
