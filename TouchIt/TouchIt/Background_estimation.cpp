@@ -44,17 +44,17 @@ cv::Mat Background_estimation::MaskBin(cv::Mat avg, cv::Mat frame, int height, i
 		{
 			pixel1 = avg.at<cv::Vec3b>(i, j);
 			pixel2 = avg.at<cv::Vec3b>(i, j);
-			for (int i = 0; i < 3; i++)
+			for (int k = 0; k < 3; k++)
 			{
-				if (pixel1[i] <= 235)
-					pixel1[i] += 20;
+				if (pixel1[k] <= 235)
+					pixel1[k] += 20;
 				else
-					pixel1[i] = 255;
+					pixel1[k] = 255;
 
-				if (pixel2[i] >= 20)
-					pixel2[i] -= 20;
+				if (pixel2[k] >= 20)
+					pixel2[k] -= 20;
 				else
-					pixel2[i] = 0;
+					pixel2[k] = 0;
 			}
 			curr = frame.at<cv::Vec3b>(i, j);
 			if (curr[0] < pixel1[0] && curr[0] > pixel2[0] &&
