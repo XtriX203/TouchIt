@@ -22,9 +22,9 @@ cv::Mat Background_estimation::GetAverageBG(cv::Mat avg, cv::Mat src, int height
 			cv::Vec3b pixel = avg.at<cv::Vec3b>(i, j);
 			cv::Vec3b curr = src.at<cv::Vec3b>(i, j);
 			//set the colors
-			R_sum = curr[0] + pixel[0] * mul;
-			G_sum = curr[1] + pixel[1] * mul;
-			B_sum = curr[2] + pixel[2] * mul;
+			R_sum = curr[0] * mul + pixel[0];
+			G_sum = curr[1] * mul + pixel[1];
+			B_sum = curr[2] * mul + pixel[2] ;
 			mul++;
 			ret.at<cv::Vec3b>(i, j) = cv::Vec3b(R_sum / mul, G_sum / mul, B_sum / mul);
 		}

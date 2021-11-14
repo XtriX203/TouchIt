@@ -150,27 +150,27 @@ cv::Vec3b Binarization::pixelRGBToHSV(cv::Vec3b pixel)
 /// <param name="pointY">the x value of the top left square</param>
 /// <param name="pointLen">the height and width of the square</param>
 /// <returns>a pixel with the lowest HSV values in the square</returns>
-cv::Vec3b Binarization::findLow(cv::Mat hsv, int pointX, int pointY, int pointLen)
+cv::Vec3b Binarization::findLow(cv::Mat frame, int pointX, int pointY, int pointLen)
 {
-	cv::Vec3b low(179, 255, 255);	//initialize with the highest values. will be returned
+	cv::Vec3b low(255, 255, 255);	//initialize with the highest values. will be returned
 
 	for (int i = pointX; i < pointX + pointLen; i++)
 	{
 		for (int j = pointY; j < pointY + pointLen; j++)
 		{
-			cv::Vec3b curr = hsv.at<cv::Vec3b>(j, i);	//the current pixel
+			cv::Vec3b curr = frame.at<cv::Vec3b>(j, i);	//the current pixel
 
-			if (curr[HUE] < low[HUE])	//check if the current HUE is lower
+			if (curr[RED] < low[RED])	//check if the current RED is lower
 			{
-				low[HUE] = curr[HUE];
+				low[RED] = curr[RED];
 			}
-			if (curr[SAT] < low[SAT])	//check if the current SAT is lower
+			if (curr[GREEN] < low[GREEN])	//check if the current GREEN is lower
 			{
-				low[SAT] = curr[SAT];
+				low[GREEN] = curr[GREEN];
 			}
-			if (curr[VAL] < low[VAL])	//check if the current VAL is lower
+			if (curr[BLUE] < low[BLUE])	//check if the current BLUE is lower
 			{
-				low[VAL] = curr[VAL];
+				low[BLUE] = curr[BLUE];
 			}
 		}
 	}
@@ -186,28 +186,28 @@ cv::Vec3b Binarization::findLow(cv::Mat hsv, int pointX, int pointY, int pointLe
 /// <param name="pointY">the x value of the top left square</param>
 /// <param name="pointLen">the height and width of the square</param>
 /// <returns>a pixel with the highest HSV values in the square</returns>
-cv::Vec3b Binarization::findHigh(cv::Mat hsv, int pointX, int pointY, int pointLen)
+cv::Vec3b Binarization::findHigh(cv::Mat frame, int pointX, int pointY, int pointLen)
 {
-	cv::Vec3b high(179, 255, 255);	//will be returned	*****works better with the max hsv values!!!***  a lucky mistake :)
+	cv::Vec3b high(0, 0, 0);	
 	
 	/*i will not remove the code yet, i thing more testing is needed*/
 	for (int i = pointX; i < pointX + pointLen; i++)
 	{
 		for (int j = pointY; j < pointY + pointLen; j++)
 		{
-			cv::Vec3b curr = hsv.at<cv::Vec3b>(j, i);
+			cv::Vec3b curr = frame.at<cv::Vec3b>(j, i);
 
-			if (curr[0] > high[0])
+			if (curr[RED] > high[RED])
 			{
-				high[0] = curr[0];
+				high[RED] = curr[RED];
 			}
-			if (curr[1] > high[1])
+			if (curr[GREEN] > high[GREEN])
 			{
-				high[1] = curr[1];
+				high[GREEN] = curr[GREEN];
 			}
-			if (curr[2] > high[2])
+			if (curr[BLUE] > high[BLUE])
 			{
-				high[2] = curr[2];
+				high[BLUE] = curr[BLUE];
 			}
 		}
 	}
@@ -221,9 +221,9 @@ cv::Vec3b Binarization::findHigh(cv::Mat hsv, int pointX, int pointY, int pointL
 /// <param name="low">the lowest HSV values for the range</param>
 /// <param name="high">the highest HSV values for the range</param>
 /// <returns>the mask in RGB color space</returns> (later might be changed to binary color space)
-cv::Mat Binarization::mask(cv::Mat hsv, cv::Vec3b low, cv::Vec3b high)
+cv::Mat Binarization::mask(cv::Mat frame, cv::Vec3b low, cv::Vec3b high)
 {
-	cv::Mat bin= cv::Mat(hsv.size().height,hsv.size().width, CV_8UC3);	//will be the binarized frame *** find a way to set the size of the mat without cloning the pic! ***
+	cv::Mat bin= cv::Mat(frame.size().height,frame.size().width, CV_8UC3);	//will be the binarized frame 
 	
 	cv::Size size = bin.size();	//the dimations of the frame
 	cv::Vec3b black = { 0,0,0 };		//black RGB
@@ -233,12 +233,12 @@ cv::Mat Binarization::mask(cv::Mat hsv, cv::Vec3b low, cv::Vec3b high)
 	{
 		for (int j = 0; j < size.width; j++)
 		{
-			cv::Vec3b curr = hsv.at<cv::Vec3b>(i, j);	//the current pixel
+			cv::Vec3b curr = frame.at<cv::Vec3b>(i, j);	//the current pixel
 
 			//check if the color is in the color range
-			if (curr[HUE] > low[HUE] && curr[HUE] < high[HUE] &&
-				curr[SAT] > low[SAT] && curr[SAT] < high[SAT] &&
-				curr[VAL] > low[VAL] && curr[VAL] < high[VAL])
+			if (curr[RED] > low[RED] && curr[RED] < high[RED] &&
+				curr[GREEN] > low[GREEN] && curr[GREEN] < high[GREEN] &&
+				curr[BLUE] > low[BLUE] && curr[BLUE] < high[BLUE])
 			{
 				bin.at<cv::Vec3b>(i, j) = white;	//set pixel as withe
 			}

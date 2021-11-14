@@ -24,12 +24,18 @@
     <ClCompile Include="Background_estimation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ColorModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Binarization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Background_estimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

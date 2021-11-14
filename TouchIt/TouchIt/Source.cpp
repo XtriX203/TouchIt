@@ -5,7 +5,7 @@
 #include <thread>
 #include <conio.h>
 #include <deque>
-#include "Binarization.h"
+#include "ColorModule.h"
 #include "Background_estimation.h"
 
 void Erosion(int, void*);
@@ -23,16 +23,24 @@ cv::Mat bin;
 
 int main()
 {
+	cv::Vec3b handColor = ColorModule::colorManager();
+
+
 	cv::VideoCapture cap(0);
 	cv::Mat frame;
 	cv::Mat avg;
 	cv::Mat background;
 	int mul = 1;
 
+	
+
 	cap.read(frame);
 	flip(frame, frame, 1);
 	avg = frame;
 	bin = frame;
+
+
+	
 
 	std::thread a(checkStop);
 	a.detach();
@@ -58,8 +66,6 @@ int main()
 		//cv::Mat bin = Binarization::mask(hsv, low, high);
 
 		cv::imshow("original", frame);	//show the RGB frame
-
-
 		cv::imshow("binarization", bin);
 		cv::waitKey(1);
 	}
