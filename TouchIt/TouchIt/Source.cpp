@@ -23,8 +23,7 @@ cv::Mat bin;
 
 int main()
 {
-	cv::Vec3b handColor = ColorModule::colorManager();
-
+	cv::Vec3b handColor = ColorModule::colorManager();//getting the hand color(from the rectangle)
 
 	cv::VideoCapture cap(0);
 	cv::Mat frame;
@@ -60,7 +59,7 @@ int main()
 			cv::imshow("average", avg);	//show the RGB frame
 		}
 
-		bin = Background_estimation::MaskBin(avg, frame, frame.rows, frame.cols);
+		bin = Background_estimation::MaskBin(avg, frame, handColor, frame.rows, frame.cols);
 		Erosion(0, 0);
 		Dilation(0, 0);
 		//cv::Mat bin = Binarization::mask(hsv, low, high);
