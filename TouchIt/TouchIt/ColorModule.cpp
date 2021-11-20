@@ -1,5 +1,4 @@
 #include "ColorModule.h"
-#include "Binarization.h"
 
 //for RGB
 #define RED 0
@@ -20,7 +19,6 @@ cv::Vec3b ColorModule::colorManager()
 	cv::VideoCapture cap(0);
 	cv::Mat frame;
 	cv::Mat f;
-	cv::Mat hsv;
 
 	cv::Vec3b low;
 	cv::Vec3b high;
@@ -45,7 +43,6 @@ cv::Vec3b ColorModule::colorManager()
 
 		if (wait)
 		{
-			//hsv = Binarization::convertToHSV(frame);
 			low = ColorModule::findLow(frame, ponitX, pointY, len);
 			high = ColorModule::findHigh(frame, ponitX, pointY, len);
 		}
