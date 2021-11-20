@@ -1,5 +1,4 @@
 #include "Background_estimation.h"
-
 #define RED 0
 #define GREEN 1
 #define BLUE 2
@@ -64,14 +63,20 @@ cv::Mat Background_estimation::MaskBin(cv::Mat avg, cv::Mat frame,cv::Vec3b targ
 			curr = frame.at<cv::Vec3b>(i, j);
 			if (curr[0] < pixel1[0] && curr[0] > pixel2[0] &&
 				curr[1] < pixel1[1] && curr[1] > pixel2[1] &&
-				curr[2] < pixel1[2] && curr[2] > pixel2[2] &&
-				!isInRange(closest,curr,20))
+				curr[2] < pixel1[2] && curr[2] > pixel2[2])
 			{
 				ret.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
 			}
 			else
 			{
-				ret.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 255, 255);
+				if (isInRange(closest, curr, 30))
+				{
+					ret.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 255, 255);
+				}
+				else
+				{
+					ret.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
+				}
 			}
 		}
 	}
@@ -89,9 +94,9 @@ cv::Vec3b Background_estimation::GetClosestColor(cv::Vec3b target, cv::Mat frame
 		for (int j = 0; j < width; j++)
 		{
 			curr = frame.at<cv::Vec3b>(i, j);
-			if (std::abs(target[RED] - curr[RED]) < min_diff[RED] &&
-				std::abs(target[GREEN] - curr[GREEN]) < min_diff[GREEN] &&
-				std::abs(target[BLUE] - curr[BLUE]) < min_diff[BLUE])
+			if (std::abs(target[RED] - curr[RED]) < std::abs(min_diff[RED]-target[RED]) &&
+				std::abs(target[GREEN] - curr[GREEN]) < std::abs(min_diff[GREEN]-target[GREEN]) &&
+				std::abs(target[BLUE] - curr[BLUE]) < std::abs(min_diff[BLUE]-target[BLUE]))
 			{
 				min_diff = curr;
 			}

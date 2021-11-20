@@ -10,7 +10,8 @@
 
 void Erosion(int, void*);
 void Dilation(int, void*);
-
+void liveCapture();
+void loadImage();
 void checkStop();
 bool stop = false;
 int erosion_elem = 2;
