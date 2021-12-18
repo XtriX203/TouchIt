@@ -7,6 +7,7 @@
 #include <deque>
 #include "ColorModule.h"
 #include "Background_estimation.h"
+#include "ObjectDetection.h"
 
 void Erosion(int, void*);
 void Dilation(int, void*);
@@ -111,9 +112,11 @@ void liveCapture()
 		Erosion(0, 0);
 		Dilation(0, 0);
 		//cv::Mat bin = Binarization::mask(hsv, low, high);
-
+		ObjectDetection ob_detect = ObjectDetection(bin);
+		cv::Mat edge = ob_detect.Detect();
 		cv::imshow("original", frame);	//show the RGB frame
 		cv::imshow("binarization", bin);
+		cv::imshow("Edge", edge);
 		cv::waitKey(1);
 	}
 }
