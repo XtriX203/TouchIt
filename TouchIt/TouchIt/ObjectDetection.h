@@ -15,10 +15,11 @@ private:
 	//vector that stores the extreme top,bottom,left and right values of the object
 	cv::Mat edge;
 
-	cv::Point2i FindFirstWhite(cv::Mat binImg);
-	void findBorder(std::vector<cv::Point2i> vec);
-	std::vector<cv::Point2i> checkBordersAround(cv::Point2i p);
-	bool isBorder(cv::Point2i p);
+	cv::Point FindFirstWhite(cv::Mat binImg);
+	void findBorder(std::vector<cv::Point> vec);
+	std::vector<cv::Point> checkBordersAround(cv::Point p);
+	bool isBorder(cv::Point p);
+	bool isWhite(cv::Vec3b p, cv::Mat frame);
 public:
 	ObjectDetection(cv::Mat bin);
 	cv::Mat Detect();
