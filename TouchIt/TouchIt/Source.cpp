@@ -49,30 +49,25 @@ int main()
 
 void loadImage()
 {
-	std::string bg;
 	std::string img;
-	std::cout << "Enter path of background:\n";
-	std::cin >> bg;
-
 	std::cout << "Enter path of current image:\n";
 	std::cin >> img;
 
-	cv::Mat background = cv::imread(bg);
 	cv::Mat frame = cv::imread(img);
 
 	// Check for failure
-	if (background.empty() || frame.empty())
+	if ( frame.empty())
 	{
 		std::cout << "Could not open or find the image" << std::endl;
 		std::cin.get(); //wait for any key press
 		return;
 	}
 
-
-
+	ObjectDetection ob = ObjectDetection(frame);
+	cv::imshow("Edge Lines", ob.Detect());
 	cv::imshow("original", frame);	//show the RGB frame
-	//cv::imshow("binarization", Background_estimation::MaskBin(background, frame, NULL, frame.rows, frame.cols));
-	// need to decide how to handle with the hand color
+	cv::waitKey(0);
+	
 }
 
 void liveCapture()
@@ -102,22 +97,21 @@ void liveCapture()
 
 		if (!stop)
 		{
-			//background.pop_front();
+			
 			avg = Background_estimation::GetAverageBG(avg, frame, frame.rows, frame.cols, mul);
-			//mul++;
 			cv::imshow("average", avg);	//show the RGB frame
 		}
 
 		bin = Background_estimation::MaskBin(avg, frame, handColor, frame.rows, frame.cols);
 		Erosion(0, 0);
 		Dilation(0, 0);
-		//cv::Mat bin = Binarization::mask(hsv, low, high);
-		ObjectDetection ob_detect = ObjectDetection(bin);
+		
+		/*ObjectDetection ob_detect = ObjectDetection(bin);
 		if (stop)
 		{
 			cv::Mat edge = ob_detect.Detect();
 			cv::imshow("Edge", edge);
-		}
+		}*/
 		cv::imshow("original", frame);	//show the RGB frame
 		cv::imshow("binarization", bin);
 		cv::waitKey(1);
