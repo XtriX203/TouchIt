@@ -14,7 +14,7 @@ private:
 	cv::Mat bin;	//the binarized image
 	//vector that stores the extreme top,bottom,left and right values of the object
 	cv::Mat edge;
-
+	cv::Mat AlignmentEdge;
 	cv::Point FindFirstWhite(cv::Mat binImg);
 	void findBorder(std::vector<cv::Point> vec);
 	std::vector<cv::Point> checkBordersAround(cv::Point p);
