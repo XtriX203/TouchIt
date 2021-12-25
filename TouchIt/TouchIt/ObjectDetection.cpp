@@ -74,8 +74,8 @@ void ObjectDetection::findBorder(std::vector<cv::Point> vec)
 	{
 		for (int i = 0; i < vec.size(); i++)
 		{
-			edge.at<cv::Vec3b>(vec[i].y, vec[i].x) = WHITE;  
-			AlignmentEdge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE;//the visual edge detection
+			edge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE; //some pixels are not colored and its make an infinite loop 
+			//AlignmentEdge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE;//the visual edge detection
 			checkMax(vec[i]);
 			std::vector<cv::Point> nearBorders = checkBordersAround(vec[i]);
 			findBorder(nearBorders);
@@ -91,9 +91,9 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 	bool upRight = true, downRight = true, upLeft = true, downLeft = true;
 
 	//right
-	if (p.x + 1 < edge.cols)
+	if (p.y + 1 < edge.cols)
 	{
-		cv::Point toCheck1 = cv::Point(p.x + 1, p.y);
+		cv::Point toCheck1 = cv::Point(p.x, p.y + 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck1), edge))
 			if (isBorder(toCheck1))
 				ret.push_back(toCheck1);
@@ -104,9 +104,9 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		downRight = false;
 	}
 	//left
-	if (p.x - 1 > 0)
+	if (p.y - 1 > 0)
 	{
-		cv::Point toCheck2 = cv::Point(p.x - 1, p.y);
+		cv::Point toCheck2 = cv::Point(p.x, p.y - 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck2), edge))
 			if (isBorder(toCheck2))
 				ret.push_back(toCheck2);
@@ -117,9 +117,9 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		downLeft = false;
 	}
 	//down
-	if (p.y + 1 < edge.rows)
+	if (p.x + 1 < edge.rows)
 	{
-		cv::Point toCheck3 = cv::Point(p.x, p.y + 1);
+		cv::Point toCheck3 = cv::Point(p.x + 1, p.y);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck3), edge))
 			if (isBorder(toCheck3))
 				ret.push_back(toCheck3);
@@ -130,9 +130,9 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		upLeft = false;
 	}
 	//up
-	if (p.y - 1 > 0)
+	if (p.x - 1 > 0)
 	{
-		cv::Point toCheck4 = cv::Point(p.x, p.y - 1);
+		cv::Point toCheck4 = cv::Point(p.x-1, p.y);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck4), edge))
 			if (isBorder(toCheck4))
 				ret.push_back(toCheck4);
@@ -145,10 +145,9 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 
 	if (downRight)
 	{
-		cv::Point toCheck5 = cv::Point(p.x + 1, p.y + 1);
+		cv::Point toCheck5 = cv::Point(p.x + 1, p.y - 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck5), edge))
 			if (isBorder(toCheck5))
-			
 				ret.push_back(toCheck5);
 	}
 	if (upLeft)
@@ -156,22 +155,20 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		cv::Point toCheck6 = cv::Point(p.x - 1, p.y - 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck6), edge))
 			if (isBorder(toCheck6))
-			
 				ret.push_back(toCheck6);
 	}
 	if (upRight)
 	{
-		cv::Point toCheck7 = cv::Point(p.x + 1, p.y + 1);
+		cv::Point toCheck7 = cv::Point(p.x+1, p.y + 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck7), edge))
 			if (isBorder(toCheck7))
-			
 				ret.push_back(toCheck7);
 	}
 	if (downLeft)
 	{
-		cv::Point toCheck8 = cv::Point(p.x - 1, p.y + 1);
-		if (isBorder(toCheck8))
-			if (!isWhite(edge.at<cv::Vec3b>(toCheck8), edge))
+		cv::Point toCheck8 = cv::Point(p.x + 1, p.y - 1);
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck8), edge))
+			if (isBorder(toCheck8))
 				ret.push_back(toCheck8);
 	}
 
@@ -183,27 +180,27 @@ bool ObjectDetection::isBorder(cv::Point p)
 {
 	int whiteCount = 0, blackCount = 0;
 	
-	//check if the furrent point is part of the object (is white)
+	//check if the current point is part of the object (is white)
 	if (!isWhite(bin.at<cv::Vec3b>(p.x, p.y), bin))
 	{
 		return false;
 	}
 	
 	//right
-	if (p.x + 1 < bin.cols)
-		isWhite(bin.at<cv::Vec3b>(p.x + 1, p.y), bin) ? whiteCount++ : blackCount++;
+	if (p.y + 1 < bin.cols)
+		isWhite(bin.at<cv::Vec3b>(p.x, p.y + 1), bin) ? whiteCount++ : blackCount++;
 	
 	//left
-	if (p.x - 1 > 0)
-		isWhite(bin.at<cv::Vec3b>(p.x - 1, p.y), bin) ? whiteCount++ : blackCount++;
+	if (p.y - 1 > 0)
+		isWhite(bin.at<cv::Vec3b>(p.x, p.y-1), bin) ? whiteCount++ : blackCount++;
 
 	//down
-	if (p.y + 1 < bin.rows)
-		isWhite(bin.at<cv::Vec3b>(p.x, p.y + 1), bin) ? whiteCount++ : blackCount++;
+	if (p.x + 1 < bin.rows)
+		isWhite(bin.at<cv::Vec3b>(p.x + 1, p.y), bin) ? whiteCount++ : blackCount++;
 
 	//up
-	if (p.y - 1 > 0)
-		isWhite(bin.at<cv::Vec3b>(p.x, p.y - 1), bin) ? whiteCount++ : blackCount++;
+	if (p.x - 1 > 0)
+		isWhite(bin.at<cv::Vec3b>(p.x - 1, p.y), bin) ? whiteCount++ : blackCount++;
 
 	if (whiteCount > 0 && blackCount > 0)
 		return true;
@@ -218,14 +215,14 @@ cv::Mat ObjectDetection::Detect()
  	std::vector<cv::Point> vec;
 	vec.push_back(pixel);
 	findBorder(vec);
-	return this->AlignmentEdge;
+	return this->edge;
 }
 
 cv::Point ObjectDetection::FindFirstWhite(cv::Mat bin)
 {
-	for (int i = 0; i < bin.rows; ++i)//its the Y
+	for (int i = 0; i < bin.rows; ++i)//its the Y(down)
 	{
-		for (int j = 0; j < bin.cols; ++j)//its the X
+		for (int j = 0; j < bin.cols; ++j)//its the X(right)
 		{
 			cv::Vec3b pixel = bin.at<cv::Vec3b>(i, j);
 			if (pixel == WHITE)
