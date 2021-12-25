@@ -94,7 +94,7 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 	if (p.y + 1 < edge.cols)
 	{
 		cv::Point toCheck1 = cv::Point(p.x, p.y + 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck1), edge))
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck1.x, toCheck1.y), edge))
 			if (isBorder(toCheck1))
 				ret.push_back(toCheck1);
 	}	
@@ -107,7 +107,7 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 	if (p.y - 1 > 0)
 	{
 		cv::Point toCheck2 = cv::Point(p.x, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck2), edge))
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck2.x, toCheck2.y), edge))
 			if (isBorder(toCheck2))
 				ret.push_back(toCheck2);
 	}
@@ -120,54 +120,54 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 	if (p.x + 1 < edge.rows)
 	{
 		cv::Point toCheck3 = cv::Point(p.x + 1, p.y);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck3), edge))
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck3.x, toCheck3.y), edge))
 			if (isBorder(toCheck3))
 				ret.push_back(toCheck3);
 	}
 	else
 	{
-		upRight = false;
-		upLeft = false;
+		downRight = false;
+		downLeft = false;
 	}
 	//up
 	if (p.x - 1 > 0)
 	{
 		cv::Point toCheck4 = cv::Point(p.x-1, p.y);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck4), edge))
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck4.x, toCheck4.y), edge))
 			if (isBorder(toCheck4))
 				ret.push_back(toCheck4);
 	}
 	else
 	{
-		downLeft = false;
-		downRight = false;
+		upLeft = false;
+		upRight = false;
 	}
 
 	if (downRight)
 	{
-		cv::Point toCheck5 = cv::Point(p.x + 1, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck5), edge))
+		cv::Point toCheck5 = cv::Point(p.x + 1, p.y + 1);
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck5.x, toCheck5.y), edge))
 			if (isBorder(toCheck5))
 				ret.push_back(toCheck5);
 	}
-	if (upLeft)
+	if (downLeft)
 	{
-		cv::Point toCheck6 = cv::Point(p.x - 1, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck6), edge))
+		cv::Point toCheck6 = cv::Point(p.x + 1, p.y - 1);
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck6.x, toCheck6.y), edge))
 			if (isBorder(toCheck6))
 				ret.push_back(toCheck6);
 	}
 	if (upRight)
 	{
-		cv::Point toCheck7 = cv::Point(p.x+1, p.y + 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck7), edge))
+		cv::Point toCheck7 = cv::Point(p.x-1, p.y + 1);
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck7.x, toCheck7.y), edge))
 			if (isBorder(toCheck7))
 				ret.push_back(toCheck7);
 	}
-	if (downLeft)
+	if (upLeft)
 	{
-		cv::Point toCheck8 = cv::Point(p.x + 1, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck8), edge))
+		cv::Point toCheck8 = cv::Point(p.x - 1, p.y - 1);
+		if (!isWhite(edge.at<cv::Vec3b>(toCheck8.x, toCheck8.y), edge))
 			if (isBorder(toCheck8))
 				ret.push_back(toCheck8);
 	}
