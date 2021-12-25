@@ -106,12 +106,12 @@ void liveCapture()
 		Erosion(0, 0);
 		Dilation(0, 0);
 		
-		/*ObjectDetection ob_detect = ObjectDetection(bin);
+		ObjectDetection ob_detect = ObjectDetection(bin);
 		if (stop)
 		{
 			cv::Mat edge = ob_detect.Detect();
 			cv::imshow("Edge", edge);
-		}*/
+		}
 		cv::imshow("original", frame);	//show the RGB frame
 		cv::imshow("binarization", bin);
 		cv::waitKey(1);
