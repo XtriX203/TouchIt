@@ -70,6 +70,7 @@ void ObjectDetection::findBorder(std::vector<cv::Point> vec)
 {
 	//check if point is white on mat
 	//checkMat(&vec, edge)
+	std::vector<std::thread> a;
 	if (!vec.empty())
 	{
 		for (int i = 0; i < vec.size(); i++)
@@ -78,8 +79,11 @@ void ObjectDetection::findBorder(std::vector<cv::Point> vec)
 			//AlignmentEdge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE;//the visual edge detection
 			checkMax(vec[i]);
 			std::vector<cv::Point> nearBorders = checkBordersAround(vec[i]);
-			findBorder(nearBorders);
-			
+			a.push_back(std::thread(&ObjectDetection::findBorder, this, nearBorders));
+		}
+		for (int i = 0; i < a.size(); i++)
+		{
+			a[i].join();
 		}
 	}
 }

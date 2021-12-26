@@ -8,13 +8,23 @@
 #include "ColorModule.h"
 #include "Background_estimation.h"
 #include "ObjectDetection.h"
+#include <mutex>
+
+std::mutex edgesMtx;
+std::mutex binarizationMtx;
 
 void Erosion(int, void*);
 void Dilation(int, void*);
 void liveCapture();
 void loadImage();
 void checkStop();
+
+void binarization();
+void edges();
+
 bool stop = false;
+bool once1 = false;
+bool once2 = false;
 int erosion_elem = 2;
 int erosion_size = 3;
 int dilation_elem = 2;
@@ -70,13 +80,14 @@ void loadImage()
 	
 }
 
+cv::Mat avg;
+cv::Mat frame;
+cv::Vec3b handColor;
 void liveCapture()
 {
-	cv::Vec3b handColor = ColorModule::colorManager();//getting the hand color(from the rectangle)
+	handColor = ColorModule::colorManager();//getting the hand color(from the rectangle)
 
 	cv::VideoCapture cap(0);
-	cv::Mat frame;
-	cv::Mat avg;
 	cv::Mat background;
 	int mul = 1;
 
@@ -90,30 +101,41 @@ void liveCapture()
 
 	while (true)
 	{
+		//binarizationMtx.lock();
 		cap.read(frame);
 		flip(frame, frame, 1);
+		cv::Mat frameCopy = frame;
+		//binarizationMtx.unlock();
 
 		//get a binarized image
 
 		if (!stop)
 		{
-			
+			//binarizationMtx.lock();
 			avg = Background_estimation::GetAverageBG(avg, frame, frame.rows, frame.cols, mul);
+			//binarizationMtx.unlock();
 			cv::imshow("average", avg);	//show the RGB frame
 		}
 
-		bin = Background_estimation::MaskBin(avg, frame, handColor, frame.rows, frame.cols);
-		Erosion(0, 0);
-		Dilation(0, 0);
-		
-		ObjectDetection ob_detect = ObjectDetection(bin);
-		if (stop)
+		if (!once2)
 		{
-			cv::Mat edge = ob_detect.Detect();
-			cv::imshow("Edge", edge);
+			once2 = false;
+			std::thread binarize(&binarization);
+			binarize.detach();
 		}
+		
+		if (stop && !once1)
+		{
+			once1 = true;
+			std::thread edge(&edges);
+			edge.detach();
+		}
+		
+		//edgesMtx.lock();
+		cv::Mat binCopy = bin;
+		//edgesMtx.unlock();
 		cv::imshow("original", frame);	//show the RGB frame
-		cv::imshow("binarization", bin);
+		cv::imshow("binarization", binCopy);
 		cv::waitKey(1);
 	}
 }
@@ -158,4 +180,40 @@ void checkStop()
 {
 	_getch();
 	stop = true;
+}
+
+void binarization()
+{
+	cv::Mat avgCopy, frameCopy, copyToBin;
+	cv::Vec3b handColorCopy;
+	while (true)
+	{
+		//binarizationMtx.lock();
+		avgCopy = avg;
+		frameCopy = frame;
+		handColorCopy = handColor;
+		//binarizationMtx.unlock();
+		copyToBin = Background_estimation::MaskBin(avgCopy, frameCopy, handColorCopy, frameCopy.rows, frameCopy.cols);
+		//edgesMtx.lock();
+		bin = copyToBin;
+		Erosion(0, 0);
+		Dilation(0, 0);
+		//edgesMtx.unlock();
+	}
+}
+
+void edges()
+{
+	cv::Mat binCopy;
+	while (true)
+	{
+		//edgesMtx.lock();
+		binCopy = bin;
+		//edgesMtx.unlock();
+		ObjectDetection ob_detect = ObjectDetection(binCopy);
+
+		cv::Mat edge = ob_detect.Detect();
+		cv::imshow("Edge", edge);
+		cv::waitKey(1);
+	}
 }
