@@ -3,6 +3,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <vector>
+#include <queue>
 
 #define WHITE cv::Vec3b(255,255,255)
 #define BLACK cv::Vec3b(0,0,0)
@@ -16,8 +17,8 @@ private:
 	cv::Mat edge;
 	cv::Mat AlignmentEdge;
 	cv::Point FindFirstWhite(cv::Mat binImg);
-	void findBorder(std::vector<cv::Point> vec);
-	std::vector<cv::Point> checkBordersAround(cv::Point p);
+	void findBorder(std::queue<cv::Point> &queue);
+	void checkBordersAround(cv::Point p, std::queue<cv::Point> &queue);
 	bool isBorder(cv::Point p);
 	bool isWhite(cv::Vec3b p, cv::Mat frame);
 public:

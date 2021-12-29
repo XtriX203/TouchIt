@@ -19,32 +19,32 @@ void checkMax(cv::Point p)
 	//set the initial values of the object extreme borders to the first point
 	if (T_B_L_R[0] == -1)
 	{
-		T_B_L_R[0] = p.y;
-		T_B_L_R[1] = p.y;
-		T_B_L_R[2] = p.x;
-		T_B_L_R[3] = p.x;
+		T_B_L_R[0] = p.x;
+		T_B_L_R[1] = p.x;
+		T_B_L_R[2] = p.y;
+		T_B_L_R[3] = p.y;
 	}
 	else
 	{
 		//if the pixel is topper then the stored top (in the frame the order of the lines starts from the top)
-		if (T_B_L_R[0] > p.y)
+		if (T_B_L_R[0] > p.x)
 		{
-			T_B_L_R[0] = p.y;
+			T_B_L_R[0] = p.x;
 		}
 		//pixel is lower then bottom
-		if (T_B_L_R[1] < p.y)
+		if (T_B_L_R[1] < p.x)
 		{
-			T_B_L_R[1] = p.y;
+			T_B_L_R[1] = p.x;
 		}
 		//pixel is extreme left
-		if (T_B_L_R[2] > p.x)
+		if (T_B_L_R[2] > p.y)
 		{
-			T_B_L_R[2] = p.x;
+			T_B_L_R[2] = p.y;
 		}
 		//pixel is extreme right
-		if (T_B_L_R[3] < p.x)
+		if (T_B_L_R[3] < p.y)
 		{
-			T_B_L_R[3] = p.x;
+			T_B_L_R[3] = p.y;
 		}
 	}
 }
@@ -66,32 +66,29 @@ ObjectDetection::ObjectDetection(cv::Mat binImg)
 }
 
 //findes all borders and colors them (recursive)
-void ObjectDetection::findBorder(std::vector<cv::Point> vec)
+void ObjectDetection::findBorder(std::queue<cv::Point> &queue)
 {
 	//check if point is white on mat
 	//checkMat(&vec, edge)
-	std::vector<std::thread> a;
-	if (!vec.empty())
+	cv::Point curr;
+	while (!queue.empty())
 	{
-		for (int i = 0; i < vec.size(); i++)
-		{
-			edge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE; //some pixels are not colored and its make an infinite loop 
-			//AlignmentEdge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE;//the visual edge detection
-			checkMax(vec[i]);
-			std::vector<cv::Point> nearBorders = checkBordersAround(vec[i]);
-			a.push_back(std::thread(&ObjectDetection::findBorder, this, nearBorders));
-		}
-		for (int i = 0; i < a.size(); i++)
-		{
-			a[i].join();
-		}
+		curr = queue.front();
+		queue.pop();
+		
+		edge.at<cv::Vec3b>(curr.x, curr.y) = WHITE; //some pixels are not colored and its make an infinite loop 
+		//AlignmentEdge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE;//the visual edge detection
+		checkMax(curr);
+		checkBordersAround(curr,queue);
 	}
+	cv::Rect rect = cv::Rect(cv::Point(T_B_L_R[0], T_B_L_R[3]), cv::Point(T_B_L_R[1], T_B_L_R[2]));
+	cv::rectangle(edge, rect, cv::Scalar(), 3);
 }
 
 //checks for border points near the current point
-std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
+void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret)
 {
-	std::vector<cv::Point> ret;
+	
 	bool upRight = true, downRight = true, upLeft = true, downLeft = true;
 
 	//right
@@ -100,7 +97,7 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		cv::Point toCheck1 = cv::Point(p.x, p.y + 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck1.x, toCheck1.y), edge))
 			if (isBorder(toCheck1))
-				ret.push_back(toCheck1);
+				ret.push(toCheck1);
 	}	
 	else
 	{
@@ -113,7 +110,7 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		cv::Point toCheck2 = cv::Point(p.x, p.y - 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck2.x, toCheck2.y), edge))
 			if (isBorder(toCheck2))
-				ret.push_back(toCheck2);
+				ret.push(toCheck2);
 	}
 	else
 	{
@@ -126,7 +123,7 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		cv::Point toCheck3 = cv::Point(p.x + 1, p.y);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck3.x, toCheck3.y), edge))
 			if (isBorder(toCheck3))
-				ret.push_back(toCheck3);
+				ret.push(toCheck3);
 	}
 	else
 	{
@@ -139,7 +136,7 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		cv::Point toCheck4 = cv::Point(p.x-1, p.y);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck4.x, toCheck4.y), edge))
 			if (isBorder(toCheck4))
-				ret.push_back(toCheck4);
+				ret.push(toCheck4);
 	}
 	else
 	{
@@ -152,31 +149,30 @@ std::vector<cv::Point> ObjectDetection::checkBordersAround(cv::Point p)
 		cv::Point toCheck5 = cv::Point(p.x + 1, p.y + 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck5.x, toCheck5.y), edge))
 			if (isBorder(toCheck5))
-				ret.push_back(toCheck5);
+				ret.push(toCheck5);
 	}
 	if (downLeft)
 	{
 		cv::Point toCheck6 = cv::Point(p.x + 1, p.y - 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck6.x, toCheck6.y), edge))
 			if (isBorder(toCheck6))
-				ret.push_back(toCheck6);
+				ret.push(toCheck6);
 	}
 	if (upRight)
 	{
 		cv::Point toCheck7 = cv::Point(p.x-1, p.y + 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck7.x, toCheck7.y), edge))
 			if (isBorder(toCheck7))
-				ret.push_back(toCheck7);
+				ret.push(toCheck7);
 	}
 	if (upLeft)
 	{
 		cv::Point toCheck8 = cv::Point(p.x - 1, p.y - 1);
 		if (!isWhite(edge.at<cv::Vec3b>(toCheck8.x, toCheck8.y), edge))
 			if (isBorder(toCheck8))
-				ret.push_back(toCheck8);
+				ret.push(toCheck8);
 	}
 
-	return ret;
 }
 
 ///check if the given point is a border
@@ -216,8 +212,8 @@ bool ObjectDetection::isBorder(cv::Point p)
 cv::Mat ObjectDetection::Detect()
 {	
 	cv::Point pixel = FindFirstWhite(this->bin);
- 	std::vector<cv::Point> vec;
-	vec.push_back(pixel);
+ 	std::queue<cv::Point> vec;
+	vec.push(pixel);
 	findBorder(vec);
 	return this->edge;
 }

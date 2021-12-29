@@ -23,8 +23,7 @@ void binarization();
 void edges();
 
 bool stop = false;
-bool once1 = false;
-bool once2 = false;
+
 int erosion_elem = 2;
 int erosion_size = 3;
 int dilation_elem = 2;
@@ -117,20 +116,13 @@ void liveCapture()
 			cv::imshow("average", avg);	//show the RGB frame
 		}
 
-		if (!once2)
-		{
-			once2 = false;
-			std::thread binarize(&binarization);
-			binarize.detach();
-		}
 		
-		if (stop && !once1)
-		{
-			once1 = true;
-			std::thread edge(&edges);
-			edge.detach();
-		}
 		
+		binarization();
+		if (stop)
+		{
+			edges();
+		}
 		//edgesMtx.lock();
 		cv::Mat binCopy = bin;
 		//edgesMtx.unlock();
@@ -186,8 +178,8 @@ void binarization()
 {
 	cv::Mat avgCopy, frameCopy, copyToBin;
 	cv::Vec3b handColorCopy;
-	while (true)
-	{
+	//while (true)
+	//{
 		//binarizationMtx.lock();
 		avgCopy = avg;
 		frameCopy = frame;
@@ -199,21 +191,16 @@ void binarization()
 		Erosion(0, 0);
 		Dilation(0, 0);
 		//edgesMtx.unlock();
-	}
+	//}
 }
 
 void edges()
 {
 	cv::Mat binCopy;
-	while (true)
-	{
-		//edgesMtx.lock();
-		binCopy = bin;
-		//edgesMtx.unlock();
-		ObjectDetection ob_detect = ObjectDetection(binCopy);
-
-		cv::Mat edge = ob_detect.Detect();
-		cv::imshow("Edge", edge);
-		cv::waitKey(1);
-	}
+	binCopy = bin;
+	ObjectDetection ob_detect = ObjectDetection(binCopy);
+	cv::Mat edge = ob_detect.Detect();
+	cv::imshow("Edge", edge);
+	cv::waitKey(1);
+	
 }
