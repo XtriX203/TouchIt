@@ -81,8 +81,9 @@ void ObjectDetection::findBorder(std::queue<cv::Point> &queue)
 		checkMax(curr);
 		checkBordersAround(curr,queue);
 	}
-	cv::Rect rect = cv::Rect(cv::Point(T_B_L_R[0], T_B_L_R[3]), cv::Point(T_B_L_R[1], T_B_L_R[2]));
-	cv::rectangle(edge, rect, cv::Scalar(), 3);
+	cv::Rect rect = cv::Rect(cv::Point(T_B_L_R[2], T_B_L_R[0]), cv::Point(T_B_L_R[3], T_B_L_R[1]));
+	cv::rectangle(edge, rect, cv::Scalar(255,255,0), 1);
+	
 }
 
 //checks for border points near the current point
