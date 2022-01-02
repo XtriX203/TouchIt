@@ -17,10 +17,11 @@ private:
 	cv::Mat edge;
 	cv::Mat AlignmentEdge;
 	cv::Point FindFirstWhite(cv::Mat binImg);
-	void findBorder(std::queue<cv::Point> &queue);
+	cv::Rect findBorder(std::queue<cv::Point> &queue);
 	void checkBordersAround(cv::Point p, std::queue<cv::Point> &queue);
 	bool isBorder(cv::Point p);
 	bool isWhite(cv::Vec3b p, cv::Mat frame);
+	void resetMaxHolder();
 public:
 	ObjectDetection(cv::Mat bin);
 	cv::Mat Detect();

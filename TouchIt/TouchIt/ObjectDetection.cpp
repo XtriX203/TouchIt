@@ -11,6 +11,14 @@ bool ObjectDetection::isWhite(cv::Vec3b p, cv::Mat frame)
 	return false;
 }
 
+void ObjectDetection::resetMaxHolder()
+{
+	T_B_L_R[0] = this->bin.rows;
+	T_B_L_R[1] = 0;
+	T_B_L_R[2] = this->bin.cols;
+	T_B_L_R[3] = 0;
+}
+
 
 
 //check if the pixel is an extreme pixel an updates if so
@@ -65,8 +73,8 @@ ObjectDetection::ObjectDetection(cv::Mat binImg)
 	}
 }
 
-//findes all borders and colors them (recursive)
-void ObjectDetection::findBorder(std::queue<cv::Point> &queue)
+//findes all borders and colors them 
+cv::Rect ObjectDetection::findBorder(std::queue<cv::Point> &queue)
 {
 	//check if point is white on mat
 	//checkMat(&vec, edge)
@@ -83,7 +91,7 @@ void ObjectDetection::findBorder(std::queue<cv::Point> &queue)
 	}
 	cv::Rect rect = cv::Rect(cv::Point(T_B_L_R[2], T_B_L_R[0]), cv::Point(T_B_L_R[3], T_B_L_R[1]));
 	cv::rectangle(edge, rect, cv::Scalar(255,255,0), 1);
-	
+	return rect;
 }
 
 //checks for border points near the current point
@@ -211,11 +219,17 @@ bool ObjectDetection::isBorder(cv::Point p)
 
 
 cv::Mat ObjectDetection::Detect()
-{	
-	cv::Point pixel = FindFirstWhite(this->bin);
- 	std::queue<cv::Point> vec;
-	vec.push(pixel);
-	findBorder(vec);
+{
+	resetMaxHolder();
+	cv::Rect rect = cv::Rect(cv::Point(0, 0),cv::Point(0, 0));
+	while (rect.area() < this->bin.total() / 6)//if the object is smaller then sixth the image
+	{ 
+		cv::Point pixel = FindFirstWhite(this->bin);
+ 		std::queue<cv::Point> vec;
+		vec.push(pixel);
+		rect = findBorder(vec);
+	
+	}
 	return this->edge;
 }
 
@@ -228,7 +242,8 @@ cv::Point ObjectDetection::FindFirstWhite(cv::Mat bin)
 			cv::Vec3b pixel = bin.at<cv::Vec3b>(i, j);
 			if (pixel == WHITE)
 			{
-				return cv::Point(i , j); //test;
+				//if(i<T_B_L_R[0] && i>T_B_L_R[1] && j>T_B_L_R[3] && j< T_B_L_R[3])
+					return cv::Point(i , j); //test;
 			}
 		}
 	}
