@@ -13,13 +13,22 @@ bool ObjectDetection::isWhite(cv::Vec3b p, cv::Mat frame)
 
 void ObjectDetection::resetMaxHolder()
 {
-	T_B_L_R[0] = this->bin.rows;
-	T_B_L_R[1] = 0;
-	T_B_L_R[2] = this->bin.cols;
-	T_B_L_R[3] = 0;
+	T_B_L_R[0] = -1;
+	T_B_L_R[1] = -1;
+	T_B_L_R[2] = -1;
+	T_B_L_R[3] = -1;
 }
 
-
+void ObjectDetection::colorRect(cv::Mat& img)
+{
+	for (int i = T_B_L_R[0]; i <= T_B_L_R[1]; i++)
+	{
+		for (int j = T_B_L_R[2]; j <= T_B_L_R[3]; j++)
+		{
+			img.at<cv::Vec3b>(i, j) = BLACK;
+		}
+	}
+}
 
 //check if the pixel is an extreme pixel an updates if so
 void checkMax(cv::Point p)
@@ -60,21 +69,22 @@ void checkMax(cv::Point p)
 //constractor
 ObjectDetection::ObjectDetection(cv::Mat binImg)
 {
-	this->bin = binImg;
-	this->edge = cv::Mat(binImg.rows, binImg.cols, CV_8UC3);
-	this->AlignmentEdge = cv::Mat(binImg.rows, binImg.cols, CV_8UC3);
-	for (int i = 0; i < edge.rows; i++)
+	this->_bin = binImg;
+	this->_edge = cv::Mat(binImg.rows, binImg.cols, CV_8UC3);
+	//this->AlignmentEdge = cv::Mat(binImg.rows, binImg.cols, CV_8UC3);
+	for (int i = 0; i < _edge.rows; i++)
 	{
-		for (int j = 0; j < edge.cols; j++)
+		for (int j = 0; j < _edge.cols; j++)
 		{
-			edge.at<cv::Vec3b>(i, j) = BLACK;
-			AlignmentEdge.at<cv::Vec3b>(i, j) = BLACK;
+			_edge.at<cv::Vec3b>(i, j) = BLACK;
+			//AlignmentEdge.at<cv::Vec3b>(i, j) = BLACK;
 		}
 	}
+	this->_bigestShape = cv::Rect(0, 0, 0, 0);
 }
 
 //findes all borders and colors them 
-cv::Rect ObjectDetection::findBorder(std::queue<cv::Point> &queue)
+cv::Rect ObjectDetection::findBorder(std::queue<cv::Point>& queue)
 {
 	//check if point is white on mat
 	//checkMat(&vec, edge)
@@ -83,31 +93,31 @@ cv::Rect ObjectDetection::findBorder(std::queue<cv::Point> &queue)
 	{
 		curr = queue.front();
 		queue.pop();
-		
-		edge.at<cv::Vec3b>(curr.x, curr.y) = WHITE; //some pixels are not colored and its make an infinite loop 
+
+		_edge.at<cv::Vec3b>(curr.x, curr.y) = WHITE; //some pixels are not colored and its make an infinite loop 
 		//AlignmentEdge.at<cv::Vec3b>(vec[i].x, vec[i].y) = WHITE;//the visual edge detection
 		checkMax(curr);
-		checkBordersAround(curr,queue);
+		checkBordersAround(curr, queue);
 	}
 	cv::Rect rect = cv::Rect(cv::Point(T_B_L_R[2], T_B_L_R[0]), cv::Point(T_B_L_R[3], T_B_L_R[1]));
-	cv::rectangle(edge, rect, cv::Scalar(255,255,0), 1);
+	cv::rectangle(_edge, rect, cv::Scalar(255, 255, 0), 1);
 	return rect;
 }
 
 //checks for border points near the current point
-void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret)
+void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point>& ret)
 {
-	
+
 	bool upRight = true, downRight = true, upLeft = true, downLeft = true;
 
 	//right
-	if (p.y + 1 < edge.cols)
+	if (p.y + 1 < _edge.cols)
 	{
 		cv::Point toCheck1 = cv::Point(p.x, p.y + 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck1.x, toCheck1.y), edge))
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck1.x, toCheck1.y), _edge))
 			if (isBorder(toCheck1))
 				ret.push(toCheck1);
-	}	
+	}
 	else
 	{
 		upRight = false;
@@ -117,7 +127,7 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret
 	if (p.y - 1 > 0)
 	{
 		cv::Point toCheck2 = cv::Point(p.x, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck2.x, toCheck2.y), edge))
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck2.x, toCheck2.y), _edge))
 			if (isBorder(toCheck2))
 				ret.push(toCheck2);
 	}
@@ -127,10 +137,10 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret
 		downLeft = false;
 	}
 	//down
-	if (p.x + 1 < edge.rows)
+	if (p.x + 1 < _edge.rows)
 	{
 		cv::Point toCheck3 = cv::Point(p.x + 1, p.y);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck3.x, toCheck3.y), edge))
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck3.x, toCheck3.y), _edge))
 			if (isBorder(toCheck3))
 				ret.push(toCheck3);
 	}
@@ -142,8 +152,8 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret
 	//up
 	if (p.x - 1 > 0)
 	{
-		cv::Point toCheck4 = cv::Point(p.x-1, p.y);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck4.x, toCheck4.y), edge))
+		cv::Point toCheck4 = cv::Point(p.x - 1, p.y);
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck4.x, toCheck4.y), _edge))
 			if (isBorder(toCheck4))
 				ret.push(toCheck4);
 	}
@@ -156,28 +166,28 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret
 	if (downRight)
 	{
 		cv::Point toCheck5 = cv::Point(p.x + 1, p.y + 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck5.x, toCheck5.y), edge))
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck5.x, toCheck5.y), _edge))
 			if (isBorder(toCheck5))
 				ret.push(toCheck5);
 	}
 	if (downLeft)
 	{
 		cv::Point toCheck6 = cv::Point(p.x + 1, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck6.x, toCheck6.y), edge))
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck6.x, toCheck6.y), _edge))
 			if (isBorder(toCheck6))
 				ret.push(toCheck6);
 	}
 	if (upRight)
 	{
-		cv::Point toCheck7 = cv::Point(p.x-1, p.y + 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck7.x, toCheck7.y), edge))
+		cv::Point toCheck7 = cv::Point(p.x - 1, p.y + 1);
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck7.x, toCheck7.y), _edge))
 			if (isBorder(toCheck7))
 				ret.push(toCheck7);
 	}
 	if (upLeft)
 	{
 		cv::Point toCheck8 = cv::Point(p.x - 1, p.y - 1);
-		if (!isWhite(edge.at<cv::Vec3b>(toCheck8.x, toCheck8.y), edge))
+		if (!isWhite(_edge.at<cv::Vec3b>(toCheck8.x, toCheck8.y), _edge))
 			if (isBorder(toCheck8))
 				ret.push(toCheck8);
 	}
@@ -188,28 +198,28 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point> &ret
 bool ObjectDetection::isBorder(cv::Point p)
 {
 	int whiteCount = 0, blackCount = 0;
-	
+
 	//check if the current point is part of the object (is white)
-	if (!isWhite(bin.at<cv::Vec3b>(p.x, p.y), bin))
+	if (!isWhite(_bin.at<cv::Vec3b>(p.x, p.y), _bin))
 	{
 		return false;
 	}
-	
+
 	//right
-	if (p.y + 1 < bin.cols)
-		isWhite(bin.at<cv::Vec3b>(p.x, p.y + 1), bin) ? whiteCount++ : blackCount++;
-	
+	if (p.y + 1 < _bin.cols)
+		isWhite(_bin.at<cv::Vec3b>(p.x, p.y + 1), _bin) ? whiteCount++ : blackCount++;
+
 	//left
 	if (p.y - 1 > 0)
-		isWhite(bin.at<cv::Vec3b>(p.x, p.y-1), bin) ? whiteCount++ : blackCount++;
+		isWhite(_bin.at<cv::Vec3b>(p.x, p.y - 1), _bin) ? whiteCount++ : blackCount++;
 
 	//down
-	if (p.x + 1 < bin.rows)
-		isWhite(bin.at<cv::Vec3b>(p.x + 1, p.y), bin) ? whiteCount++ : blackCount++;
+	if (p.x + 1 < _bin.rows)
+		isWhite(_bin.at<cv::Vec3b>(p.x + 1, p.y), _bin) ? whiteCount++ : blackCount++;
 
 	//up
 	if (p.x - 1 > 0)
-		isWhite(bin.at<cv::Vec3b>(p.x - 1, p.y), bin) ? whiteCount++ : blackCount++;
+		isWhite(_bin.at<cv::Vec3b>(p.x - 1, p.y), _bin) ? whiteCount++ : blackCount++;
 
 	if (whiteCount > 0 && blackCount > 0)
 		return true;
@@ -218,22 +228,50 @@ bool ObjectDetection::isBorder(cv::Point p)
 
 
 
-cv::Mat ObjectDetection::Detect()
+cv::Mat ObjectDetection::detect()
 {
+	cv::Rect rect = cv::Rect(cv::Point(0, 0), cv::Point(0, 0));
+	cv::Mat temp = this->_bin.clone();
+
 	resetMaxHolder();
-	cv::Rect rect = cv::Rect(cv::Point(0, 0),cv::Point(0, 0));
-	while (rect.area() < this->bin.total() / 6)//if the object is smaller then sixth the image
-	{ 
-		cv::Point pixel = FindFirstWhite(this->bin);
- 		std::queue<cv::Point> vec;
+	while (/*rect.area() < this->bin.total() / 16*/ true)//if the object is smaller then sixth the image
+	{
+		cv::Point pixel = findFirstWhite(temp);
+		if (pixel.x == -1)//while didnt found
+		{
+			return this->_edge;
+		}
+		std::queue<cv::Point> vec;
 		vec.push(pixel);
 		rect = findBorder(vec);
-	
+		if (rect.area() > this->_bigestShape.area())
+		{
+			this->_bigestShape = rect;
+		}
+		colorRect(temp);
+		resetMaxHolder();
 	}
-	return this->edge;
+	return this->_edge;
 }
 
-cv::Point ObjectDetection::FindFirstWhite(cv::Mat bin)
+cv::Mat ObjectDetection::getHand()
+{
+	cv::Mat ret = cv::Mat(this->_bigestShape.size().height + 1, this->_bigestShape.size().width + 1, CV_8UC3);
+
+	int top = this->_bigestShape.tl().y, bot = this->_bigestShape.br().y;
+	int left = this->_bigestShape.tl().x, right = this->_bigestShape.br().x;
+
+	for (int i = top; i <= bot; i++)
+	{
+		for (int j = left; j <= right; j++)
+		{
+			ret.at<cv::Vec3b>(i - top, j - left) = this->_bin.at<cv::Vec3b>(i, j);
+		}
+	}
+	return ret;
+}
+
+cv::Point ObjectDetection::findFirstWhite(cv::Mat bin)
 {
 	for (int i = 0; i < bin.rows; ++i)//its the Y(down)
 	{
@@ -242,10 +280,12 @@ cv::Point ObjectDetection::FindFirstWhite(cv::Mat bin)
 			cv::Vec3b pixel = bin.at<cv::Vec3b>(i, j);
 			if (pixel == WHITE)
 			{
-				//if(i<T_B_L_R[0] && i>T_B_L_R[1] && j>T_B_L_R[3] && j< T_B_L_R[3])
-					return cv::Point(i , j); //test;
+				if (!(i >= T_B_L_R[0] && i <= T_B_L_R[1] && j >= T_B_L_R[2] && j <= T_B_L_R[3]))
+				{
+					return cv::Point(i, j); //test;
+				}
 			}
 		}
 	}
-	return cv::Point(0, 0);
+	return cv::Point(-1, -1);
 }

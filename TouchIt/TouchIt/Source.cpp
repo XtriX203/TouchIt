@@ -46,13 +46,13 @@ int main()
 		liveCapture();
 		break;
 	case 2:
-		
+
 		loadImage();
 		break;
 	default:
 		break;
 	}
-	
+
 	return 0;
 }
 
@@ -65,7 +65,7 @@ void loadImage()
 	cv::Mat frame = cv::imread(img);
 
 	// Check for failure
-	if ( frame.empty())
+	if (frame.empty())
 	{
 		std::cout << "Could not open or find the image" << std::endl;
 		std::cin.get(); //wait for any key press
@@ -73,10 +73,11 @@ void loadImage()
 	}
 
 	ObjectDetection ob = ObjectDetection(frame);
-	cv::imshow("Edge Lines", ob.Detect());
+	cv::imshow("Edge Lines", ob.detect());
+	cv::imshow("Hand", ob.getHand());
 	cv::imshow("original", frame);	//show the RGB frame
 	cv::waitKey(0);
-	
+
 }
 
 cv::Mat avg;
@@ -116,8 +117,8 @@ void liveCapture()
 			cv::imshow("average", avg);	//show the RGB frame
 		}
 
-		
-		
+
+
 		binarization();
 		if (stop)
 		{
@@ -181,17 +182,17 @@ void binarization()
 	//while (true)
 	//{
 		//binarizationMtx.lock();
-		avgCopy = avg;
-		frameCopy = frame;
-		handColorCopy = handColor;
-		//binarizationMtx.unlock();
-		copyToBin = Background_estimation::MaskBin(avgCopy, frameCopy, handColorCopy, frameCopy.rows, frameCopy.cols);
-		//edgesMtx.lock();
-		bin = copyToBin;
-		Erosion(0, 0);
-		Dilation(0, 0);
-		//edgesMtx.unlock();
-	//}
+	avgCopy = avg;
+	frameCopy = frame;
+	handColorCopy = handColor;
+	//binarizationMtx.unlock();
+	copyToBin = Background_estimation::MaskBin(avgCopy, frameCopy, handColorCopy, frameCopy.rows, frameCopy.cols);
+	//edgesMtx.lock();
+	bin = copyToBin;
+	Erosion(0, 0);
+	Dilation(0, 0);
+	//edgesMtx.unlock();
+//}
 }
 
 void edges()
@@ -199,8 +200,10 @@ void edges()
 	cv::Mat binCopy;
 	binCopy = bin;
 	ObjectDetection ob_detect = ObjectDetection(binCopy);
-	cv::Mat edge = ob_detect.Detect();
+	cv::Mat edge = ob_detect.detect();
+	cv::Mat hand = ob_detect.getHand();
 	cv::imshow("Edge", edge);
+	cv::imshow("Hand", hand);
 	cv::waitKey(1);
-	
+
 }
