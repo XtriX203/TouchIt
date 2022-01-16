@@ -69,7 +69,7 @@ cv::Mat Background_estimation::MaskBin(cv::Mat avg, cv::Mat frame,cv::Vec3b targ
 			}
 			else
 			{
-				if (isInRange(closest, curr, 100))
+				if (isInRange(closest, curr, 60))
 				{
 					ret.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 255, 255);
 				}
