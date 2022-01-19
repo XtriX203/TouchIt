@@ -80,8 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\Magshimim\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Magshimim\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -148,12 +148,14 @@
     <ClCompile Include="Background_estimation.cpp" />
     <ClCompile Include="Binarization.cpp" />
     <ClCompile Include="ColorModule.cpp" />
+    <ClCompile Include="ObjectDetection.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Background_estimation.h" />
     <ClInclude Include="Binarization.h" />
     <ClInclude Include="ColorModule.h" />
+    <ClInclude Include="ObjectDetection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
