@@ -25,9 +25,9 @@ void edges();
 bool stop = false;
 
 int open_elem = 2;
-int open_size = 3;
+int open_size = 2;
 int close_elem = 2;
-int close_size = 3;
+int close_size = 2;
 int const max_elem = 2;
 int const max_kernel_size = 21;
 cv::Mat bin;
@@ -206,7 +206,6 @@ void edges()
 	ObjectDetection ob_detect = ObjectDetection(binCopy);
 	cv::Mat edge = ob_detect.detect();
 	cv::Mat hand = ob_detect.getHand();
-	cv::imshow("Edge", edge);
 	cv::imshow("Hand", hand);
 	cv::waitKey(1);
 

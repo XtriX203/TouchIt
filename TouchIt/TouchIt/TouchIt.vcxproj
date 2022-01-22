@@ -148,6 +148,7 @@
     <ClCompile Include="Background_estimation.cpp" />
     <ClCompile Include="Binarization.cpp" />
     <ClCompile Include="ColorModule.cpp" />
+    <ClCompile Include="FingerDetection.cpp" />
     <ClCompile Include="ObjectDetection.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
@@ -155,6 +156,7 @@
     <ClInclude Include="Background_estimation.h" />
     <ClInclude Include="Binarization.h" />
     <ClInclude Include="ColorModule.h" />
+    <ClInclude Include="FingerDetection.h" />
     <ClInclude Include="ObjectDetection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

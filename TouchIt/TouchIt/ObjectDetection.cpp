@@ -100,7 +100,7 @@ cv::Rect ObjectDetection::findBorder(std::queue<cv::Point>& queue)
 		checkBordersAround(curr, queue);
 	}
 	cv::Rect rect = cv::Rect(cv::Point(T_B_L_R[2], T_B_L_R[0]), cv::Point(T_B_L_R[3], T_B_L_R[1]));
-	cv::rectangle(_edge, rect, cv::Scalar(255, 255, 0), 1);
+	//cv::rectangle(_edge, rect, cv::Scalar(255, 255, 0), 1);
 	return rect;
 }
 
@@ -124,7 +124,7 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point>& ret
 		downRight = false;
 	}
 	//left
-	if (p.y - 1 > 0)
+	if (p.y - 1 >= 0)
 	{
 		cv::Point toCheck2 = cv::Point(p.x, p.y - 1);
 		if (!isWhite(_edge.at<cv::Vec3b>(toCheck2.x, toCheck2.y), _edge))
@@ -150,7 +150,7 @@ void ObjectDetection::checkBordersAround(cv::Point p, std::queue<cv::Point>& ret
 		downLeft = false;
 	}
 	//up
-	if (p.x - 1 > 0)
+	if (p.x - 1 >= 0)
 	{
 		cv::Point toCheck4 = cv::Point(p.x - 1, p.y);
 		if (!isWhite(_edge.at<cv::Vec3b>(toCheck4.x, toCheck4.y), _edge))
@@ -265,7 +265,7 @@ cv::Mat ObjectDetection::getHand()
 	{
 		for (int j = left; j <= right; j++)
 		{
-			ret.at<cv::Vec3b>(i - top, j - left) = this->_bin.at<cv::Vec3b>(i, j);
+			ret.at<cv::Vec3b>(i - top, j - left) = this->_edge.at<cv::Vec3b>(i, j);
 		}
 	}
 	return ret;
