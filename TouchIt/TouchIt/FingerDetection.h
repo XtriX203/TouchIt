@@ -11,12 +11,15 @@ class FingerDetection
 private:
 	cv::Mat _hand;
 	std::vector<cv::Point> _fingers;
+	cv::Point findMax(std::vector<cv::Point> one, std::vector<cv::Point> two);
+	void colorFingers();
+	cv::Point findNextWhite(cv::Point p, cv::Point prev);
 
 public:
 	FingerDetection(cv::Mat hand);
 	std::vector<cv::Point> findFingers();
 	std::vector<cv::Point> getFingers();
-	cv::Point findNextWhite(cv::Point p);
 	cv::Point findTopFingerTip();
+	cv::Mat getHand();
 };
 

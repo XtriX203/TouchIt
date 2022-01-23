@@ -8,6 +8,7 @@
 #include "ColorModule.h"
 #include "Background_estimation.h"
 #include "ObjectDetection.h"
+#include "FingerDetection.h"
 #include <mutex>
 
 std::mutex edgesMtx;
@@ -74,7 +75,9 @@ void loadImage()
 
 	ObjectDetection ob = ObjectDetection(frame);
 	cv::imshow("Edge Lines", ob.detect());
-	cv::imshow("Hand", ob.getHand());
+	FingerDetection f = FingerDetection(ob.getHand());
+	f.findFingers();
+	cv::imshow("Hand", f.getHand());
 	cv::imshow("original", frame);	//show the RGB frame
 	cv::waitKey(0);
 
@@ -205,7 +208,9 @@ void edges()
 	binCopy = bin;
 	ObjectDetection ob_detect = ObjectDetection(binCopy);
 	cv::Mat edge = ob_detect.detect();
-	cv::Mat hand = ob_detect.getHand();
+	FingerDetection f_detect = FingerDetection(ob_detect.getHand());
+	f_detect.findFingers();
+	cv::Mat hand = f_detect.getHand();
 	cv::imshow("Hand", hand);
 	cv::waitKey(1);
 
