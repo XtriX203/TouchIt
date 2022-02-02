@@ -12,7 +12,8 @@ private:
 	cv::Mat _hand;
 	std::vector<cv::Point> _fingers;
 	cv::Point findMax(std::vector<cv::Point> one, std::vector<cv::Point> two);
-	void colorFingers();
+	cv::Point findMin(std::vector<cv::Point> one, std::vector<cv::Point> two);
+	void colorFingers(std::vector<cv::Point> vec, cv::Scalar s);
 	cv::Point findNextWhite(cv::Point p, cv::Point prev);
 
 public:

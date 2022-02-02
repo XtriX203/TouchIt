@@ -1,5 +1,7 @@
 #include "FingerDetection.h"
 
+#define GREEN cv::Scalar(0, 255, 0)
+#define RED cv::Scalar(0, 0, 255)
 
 FingerDetection::FingerDetection(cv::Mat hand): _hand(hand)
 {
@@ -9,13 +11,15 @@ std::vector<cv::Point> FingerDetection::findFingers()
 {
 	cv::Mat test = _hand;	//rem
 
+	cv::Point min;
+	std::vector<cv::Point> temp;
 	cv::Point top = findTopFingerTip();
 	this->_fingers.push_back(top);
 	cv::Point curr = top;
 	cv::Point prev = cv::Point(top.x + 1, top.y);
 	cv::Point prevHolder;
 	int counter = 0;
-	bool down = true;
+	bool up = false, once = false;
 	std::vector<cv::Point> one;
 	std::vector<cv::Point> two;
 	bool leftSide = false;
@@ -33,6 +37,10 @@ std::vector<cv::Point> FingerDetection::findFingers()
 			//prevHolder = findNextWhite(top, cv::Point(-1, 1));
 			curr = findNextWhite(top, cv::Point(-1, 1));
 			leftSide = true;
+			once = false;
+			up = false;
+			one.clear();
+			two.clear();
 			if (curr.x == -1)
 				break;
 		}
@@ -42,26 +50,31 @@ std::vector<cv::Point> FingerDetection::findFingers()
 		prev = prevHolder;
 		two.push_back(curr);
 
-		if (counter == 100 || curr == top)
+		if (counter == this->_hand.cols / 10 || curr == top)
 		{
 			if (two[0].x - two[two.size()-1].x < 0)
 			{
-				if (!down)
+				if (up)
 				{
 					this->_fingers.push_back(findMax(one, two));
-					down = true;
+					up = false;
+					once = false;
 				}
 			}
 			else
 			{
-				down = false;
+				up = true;
+				if (!once)
+					temp.push_back(this->findMin(one, two));
+				once = true;
 			}
 			one = two;
 			two.clear();
 			counter = 0;
 		}
 	}while (curr != top);
-	colorFingers();
+	colorFingers(this->_fingers, GREEN);
+	colorFingers(temp, RED);
 	//cv::imshow("test", test); //rem
 
 	return this->_fingers;
@@ -69,8 +82,13 @@ std::vector<cv::Point> FingerDetection::findFingers()
 
 cv::Point FingerDetection::findMax(std::vector<cv::Point> one, std::vector<cv::Point> two)
 {
-	cv::Point max1 = one[0];
 	cv::Point max2 = two[0];
+	cv::Point max1;
+
+	if (!one.empty())
+		max1 = one[0];
+	else
+		max1 = cv::Point(-1, -1);
 
 	for (int i = 1; i < two.size(); i++)
 	{
@@ -84,15 +102,37 @@ cv::Point FingerDetection::findMax(std::vector<cv::Point> one, std::vector<cv::P
 	return max1.x < max2.x ? max1 : max2;
 }
 
-void FingerDetection::colorFingers()
+cv::Point FingerDetection::findMin(std::vector<cv::Point> one, std::vector<cv::Point> two)
 {
-	for (int i = 0; i < this->_fingers.size(); i++)
+	cv::Point min2 = two[0];
+	cv::Point min1;
+
+	if (!one.empty())
+		min1 = one[0];
+	else
+		min1 = cv::Point(this->_hand.rows, this->_hand.cols);
+
+	for (int i = 1; i < two.size(); i++)
 	{
-		cv::Rect rect = cv::Rect(cv::Point(this->_fingers[i].y - 1 < 0 ? this->_fingers[i].y : this->_fingers[i].y - 1,
-			this->_fingers[i].x - 1 < 0 ? this->_fingers[i].x : this->_fingers[i].x - 1),
-			cv::Point(this->_fingers[i].y + 1 >= this->_hand.cols ? this->_fingers[i].y : this->_fingers[i].y + 1,
-				this->_fingers[i].x + 1 >= this->_hand.rows ? this->_fingers[i].x : this->_fingers[i].x + 1));
-		cv::rectangle(this->_hand, rect, cv::Scalar(0, 255, 0), 5);
+		min2 = min2.x > two[i].x ? min2 : two[i];
+	}
+	for (int i = 1; i < one.size(); i++)
+	{
+		min1 = min1.x > one[i].x ? min1 : one[i];
+	}
+
+	return min1.x > min2.x ? min1 : min2;
+}
+
+void FingerDetection::colorFingers(std::vector<cv::Point> vec, cv::Scalar s)
+{
+	for (int i = 0; i < vec.size(); i++)
+	{
+		cv::Rect rect = cv::Rect(cv::Point(vec[i].y - 1 < 0 ? vec[i].y : vec[i].y - 1,
+			vec[i].x - 1 < 0 ? vec[i].x : vec[i].x - 1),
+			cv::Point(vec[i].y + 1 >= this->_hand.cols ? vec[i].y : vec[i].y + 1,
+				vec[i].x + 1 >= this->_hand.rows ? vec[i].x : vec[i].x + 1));
+		cv::rectangle(this->_hand, rect, s, 5);
 	}
 }
 
@@ -107,7 +147,7 @@ cv::Point FingerDetection::findNextWhite(cv::Point p, cv::Point prev)
 		}
 	}
 	//down
-	if (p.x + 1 < _hand.rows)
+	if (p.x + 1 < _hand.rows *3/4)
 	{
 		if (prev != cv::Point(p.x + 1, p.y) && this->_hand.at<cv::Vec3b>(p.x+1, p.y) == WHITE)
 		{
@@ -131,7 +171,7 @@ cv::Point FingerDetection::findNextWhite(cv::Point p, cv::Point prev)
 		}
 	}
 	//down right
-	if (p.y + 1 < _hand.cols && p.x + 1 < _hand.rows)
+	if (p.y + 1 < _hand.cols && p.x + 1 < _hand.rows *3/4)
 	{
 		if (prev != cv::Point(p.x, p.y + 1) && this->_hand.at<cv::Vec3b>(p.x + 1 , p.y + 1) == WHITE)
 		{
@@ -147,7 +187,7 @@ cv::Point FingerDetection::findNextWhite(cv::Point p, cv::Point prev)
 		}
 	}
 	//down left
-	if (p.y - 1 >= 0 && p.x + 1 < _hand.rows)
+	if (p.y - 1 >= 0 && p.x + 1 < _hand.rows *3/4)
 	{
 		if (prev != cv::Point(p.x + 1, p.y - 1) && this->_hand.at<cv::Vec3b>(p.x + 1, p.y - 1) == WHITE)
 		{
