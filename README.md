@@ -10,7 +10,7 @@ then press and key on your keyboard.
 3)raise one finger and move the hand to move the cursor or raise two fingers to perform a click.
 
 Algorithms used:
-1)when the user cover the rectangle and press the keyboard button, the program take the range of colors in the rectangle to match the hand color.
+\n1)when the user cover the rectangle and press the keyboard button, the program take the range of colors in the rectangle to match the hand color.
 2)when the user confirm the background, we take the last 10  frames and compare each frame to those frames, then we use the difference to track the hand.
 3) when we have the difference between the frames we use the color range and perform binarization to mark in white only the hand and the face(mostly they are the same color).
 4)we perform edge detection over the objects.
