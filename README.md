@@ -23,7 +23,7 @@ Algorithms used: <br />
 2)windows os
 
 
-
+## GIT Guide
 ```
 cd existing_repo
 git remote add origin https://gitlab.com/TpOiMvEoR/bat-yam-1105-touchit.git
