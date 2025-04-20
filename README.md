@@ -1,38 +1,37 @@
+
 # Bat Yam-1105-TouchIt
 
-Hand recognition application that uses hand gestures as a mouse.
-Written with c++ using WINAPI and opencv library.
+A hand recognition application that uses hand gestures to simulate mouse functionality.  
+Developed in C++ with the WINAPI and OpenCV libraries.
 
-## How the application works:
-1) Run the program  
-2) Place your hand so it cover the marked rectangle in the window opened. <br />
-then press any key on your keyboard. <br />
-3) Stabilize your background and again click on any button on your keyboard. <br />
-4) Raise one finger and move the hand to move the cursor or raise two fingers to perform a click. <br />
+## How the Application Works:
+1. Launch the program.  
+2. Place your hand to fully cover the marked rectangle in the displayed window.  
+   Then, press any key on your keyboard.  
+3. Stabilize the background and press any key again.  
+4. Raise one finger to move the cursor or raise two fingers to perform a click.  
 
-## Algorithms used: <br />
-1)Get the range of colors of the hand when the user fully covers the rectangle with his hand. <br />
-2)When the user confirm the background, we save the last 10 frames and compare each frame to those frames, then we use compare the color differance to track the hand. <br />
-3)When we have the difference between the frames we use the color range and perform binarization to mark in white only the hand and the face(mostly they are the same color). <br />
-4)Perform edge detection over the objects. <br />
-5)Perform shape check to distinguish between the face and the hand. <br />
-6)perform "section iteration" to check the number of fingers raised. <br />
-7)Perform the selected action using WINAPI. <br />
+## Algorithm Overview:
+1. Detect the hand's color range when the user completely covers the rectangle.  
+2. After background confirmation, capture the last 10 frames and compare them to track the hand using color differences.  
+3. Apply binarization to isolate the hand and face by marking them in white (assuming they are similar in color).  
+4. Perform edge detection on the objects.  
+5. Differentiate between the hand and face based on shape analysis.  
+6. Use "section iteration" to count the number of raised fingers.  
+7. Execute the corresponding action via WINAPI.  
 
-## requirements:
-1)web cam connected to your pc.
-2)windows os.
+## Requirements:
+1. A webcam connected to your PC.  
+2. Windows operating system.  
 
 ## Assumptions:
-1) The backround is still.
-2) The hand is bigger then the face.
+1. The background remains static.  
+2. The hand is larger than the face.  
 
-## GIT Guide
-```
+## Git Guide:
+```bash
 cd existing_repo
 git remote add origin https://gitlab.com/TpOiMvEoR/bat-yam-1105-touchit.git
 git branch -M main
 git push -uf origin main
 ```
-
-
